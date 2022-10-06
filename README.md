@@ -9,7 +9,7 @@ sudo apt install ansible
 
 ## Ansible config deployment:
 ```bash
-ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
+sudo ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
 ```
 ### flags:
 ```bash

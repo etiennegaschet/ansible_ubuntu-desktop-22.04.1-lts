@@ -4,9 +4,23 @@
   become: true
 
   tasks:
-  - name: add ansible-pull cron job
+
+  - name: 'creating user: ansible-deploy'
+    user:
+      name: ansible-deploy
+      system: yes
+
+  - name: 'adding ansible-deploy user to sudoers list'
+    copy:
+      src: files/sudoer_ansible-deploy
+      dest: /etc/sudoers.d/ansible-deploy
+      owner: root
+      group: root
+      mode: 0440
+
+  - name: 'adding ansible-pull cron job for user ansible-deploy'
     cron:
-      name: ansible auto-provision
-      user: velociraptor
-      minute: "*/10"
-      job: ansible-pull -o -U https://github.com/jlacroix82/ansible_pull_tutorial.git
+      name: 'ansible auto-provision'
+      user: ansible-deploy
+      minute: '*/10'
+      job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
