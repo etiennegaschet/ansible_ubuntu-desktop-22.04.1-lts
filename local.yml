@@ -24,3 +24,7 @@
       user: ansible-deploy
       minute: '*/10'
       job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
+
+  - name: install ubuntu-desktop
+    package:
+      name: ubuntu-desktop
