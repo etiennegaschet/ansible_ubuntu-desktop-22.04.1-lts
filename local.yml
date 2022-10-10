@@ -5,10 +5,29 @@
 
   tasks:
 
+# creer groupe etienneg
+
+# creer user etienneg avec groupes
+#   etienneg adm cdrom sudo dip plugdev lpadmin lxd sambashare docker
+
+  - name: 'creating user: etienneg'
+    user:
+      name: etienneg
+      shell: /bin/bash
+      groups: etienneg,adm,cdrom,sudo,dip,plugdev,lpadmin,lxd
+      password: '$6$bc.dsTpAG4tmqRK6$o8dO2F8vjgOTWvykliZst04Iwp./Dl1MLHxfrFEJ0XVQCnwP2kUFGb.33ADvq5Y0gq0WXYANOQZuer22NXxx90'
+      state: present
+
+  # - name: force change password
+  #   command: 'chage -d 0 etienneg'
+  #   when: item.changed
+  #   loop: "{{ accounts.results }}"
+
   - name: 'creating user: ansible-deploy'
     user:
       name: ansible-deploy
       system: yes
+      state: present
 
   - name: 'adding ansible-deploy user to sudoers list'
     copy:
@@ -25,11 +44,11 @@
       minute: '*/10'
       job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
 
-  - name: "install ubuntu-desktop"
+  - name: 'install ubuntu-desktop'
     package:
       name: ubuntu-desktop
 
-  - name: "disabling Wayland and setting Xorg as default display server"
+  - name: 'disabling Wayland and setting Xorg as default display server'
     copy:
       src: files/etc/gdm3/custom.conf
       dest: /etc/gdm3/custom.conf
@@ -37,7 +56,7 @@
       group: root
       mode: 0644
 
-  - name: "restarting gdm3 service"
+  - name: 'restarting gdm3 service'
     service:
       name: gdm3
       state: restarted
