@@ -8,13 +8,13 @@
 # creer groupe etienneg
 
 # creer user etienneg avec groupes
-#   etienneg adm cdrom sudo dip plugdev lpadmin lxd sambashare docker
+#   lpadmin sambashare docker
 
   - name: 'creating user: etienneg'
     user:
       name: etienneg
       shell: /bin/bash
-      groups: etienneg,adm,cdrom,sudo,dip,plugdev,lpadmin,lxd
+      groups: etienneg,adm,cdrom,sudo,dip,plugdev,lxd
       password: '$6$bc.dsTpAG4tmqRK6$o8dO2F8vjgOTWvykliZst04Iwp./Dl1MLHxfrFEJ0XVQCnwP2kUFGb.33ADvq5Y0gq0WXYANOQZuer22NXxx90'
       state: present
 
