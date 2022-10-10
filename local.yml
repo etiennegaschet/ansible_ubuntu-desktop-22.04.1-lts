@@ -12,7 +12,7 @@
 
   - name: 'adding ansible-deploy user to sudoers list'
     copy:
-      src: files/sudoer_ansible-deploy
+      src: files/etc/sudoers.d/ansible-deploy
       dest: /etc/sudoers.d/ansible-deploy
       owner: root
       group: root
@@ -25,6 +25,37 @@
       minute: '*/10'
       job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
 
-  - name: install ubuntu-desktop
+  - name: "install ubuntu-desktop"
     package:
       name: ubuntu-desktop
+
+  - name: "disabling Wayland and setting Xorg as default display server"
+    copy:
+      src: files/etc/gdm3/custom.conf
+      dest: /etc/gdm3/custom.conf
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: "restarting gdm3 service"
+    service:
+      name: gdm3
+      state: restarted
+
+  # - name: install CLI tools
+  #   package:
+  #     name:
+  #       - jq
+  #       - libsecret-tools
+  #       - shellcheck
+  #       - python3-pip
+
+  # - name: install Desktop tools
+  #   package:
+  #     name:
+  #       - 
+
+  # - name: install Desktop tools via snap
+  #   package:
+  #     name:
+  #       - blueman

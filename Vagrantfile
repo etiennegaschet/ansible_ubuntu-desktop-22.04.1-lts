@@ -7,6 +7,7 @@ echo Installing Desktop
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 
+apt-get install -y software-properties-common
 apt-get install -y ansible
 
 apt-get clean
@@ -27,7 +28,7 @@ SCRIPT
 
 Vagrant.configure("2") do |config|
 
-  # config.vm.synced_folder "shared_data", "/vagrant_data"
+  config.vm.synced_folder "shared_data", "/vagrant_data"
   config.vm.box = "generic/ubuntu2204"
   config.vm.box_version = "4.1.14"
 
