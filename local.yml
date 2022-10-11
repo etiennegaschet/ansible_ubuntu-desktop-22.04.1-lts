@@ -8,21 +8,16 @@
   - name: 'creating user: etienneg'
     user:
       state: present
-      name: etienneg
+      name: "{{ item }}"
       shell: /bin/bash
       append: yes
       groups: adm,cdrom,sudo,dip,plugdev,lxd
       password: '$6$bc.dsTpAG4tmqRK6$o8dO2F8vjgOTWvykliZst04Iwp./Dl1MLHxfrFEJ0XVQCnwP2kUFGb.33ADvq5Y0gq0WXYANOQZuer22NXxx90'
       update_password: on_create
-
-  # #
-  # # run 'chage -d 0 myusername' command for newly created users only, so they are forced to change their password:
-  # # https://serverfault.com/questions/1106276/ansible-how-to-run-subsequent-task-for-only-newly-created-users
-  # #
-  # - name: force change password
-  #   command: 'chage -d 0 etienneg'
-  #   when: item.changed
-  #   loop: "{{ accounts.results }}"
+    loop:
+      - etienneg
+    register: users_forced_to_change_password
+    notify: change password
 
   - name: 'creating user: ansible-deploy'
     user:
@@ -91,3 +86,10 @@
   #   package:
   #     name:
   #       - blueman
+
+  handlers:
+    - name: 'forcing new users to change their password on first login'
+      shell: chage -d 0 {{ item.name }}
+      loop: "{{ users_forced_to_change_password.results }}"
+      when: item.changed
+      listen: change password
