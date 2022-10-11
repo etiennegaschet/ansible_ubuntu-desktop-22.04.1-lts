@@ -69,6 +69,11 @@
       name:
         - jq
 
+  - name: install shellcheck
+    package:
+      name:
+        - shellcheck
+
   # - name: install CLI tools
   #   package:
   #     name:
