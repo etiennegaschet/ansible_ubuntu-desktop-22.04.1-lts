@@ -7,13 +7,13 @@
 
   - name: 'creating user: etienneg'
     user:
+      state: present
       name: etienneg
       shell: /bin/bash
       append: yes
       groups: adm,cdrom,sudo,dip,plugdev,lxd
       password: '$6$bc.dsTpAG4tmqRK6$o8dO2F8vjgOTWvykliZst04Iwp./Dl1MLHxfrFEJ0XVQCnwP2kUFGb.33ADvq5Y0gq0WXYANOQZuer22NXxx90'
       # update_password: on_create
-      state: present
 
   # #
   # # run 'chage -d 0 myusername' command for newly created users only, so they are forced to change their password:
@@ -26,11 +26,10 @@
 
   - name: 'creating user: ansible-deploy'
     user:
+      state: present
       name: ansible-deploy
       system: yes
       shell: /bin/false
-      create_home: no
-      state: present
 
   - name: 'adding ansible-deploy user to sudoers list'
     copy:
@@ -65,10 +64,10 @@
       name: gdm3
       state: restarted
 
-  - name: install jq
-    package:
-      name:
-        - jq
+  # - name: install jq
+  #   package:
+  #     name:
+  #       - jq
 
   # - name: install CLI tools
   #   package:
