@@ -59,10 +59,10 @@
       name: gdm3
       state: restarted
 
-  # - name: install jq
-  #   package:
-  #     name:
-  #       - jq
+  - name: install jq
+    package:
+      name:
+        - jq
 
   # - name: install shellcheck
   #   package:
