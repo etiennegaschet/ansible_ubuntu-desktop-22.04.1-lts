@@ -5,11 +5,6 @@
 
   tasks:
 
-# creer groupe etienneg
-
-# creer user etienneg avec groupes
-#   lpadmin sambashare docker
-
   - name: 'creating user: etienneg'
     user:
       name: etienneg
@@ -17,8 +12,13 @@
       append: yes
       groups: adm,cdrom,sudo,dip,plugdev,lxd
       password: '$6$bc.dsTpAG4tmqRK6$o8dO2F8vjgOTWvykliZst04Iwp./Dl1MLHxfrFEJ0XVQCnwP2kUFGb.33ADvq5Y0gq0WXYANOQZuer22NXxx90'
+      # update_password: on_create
       state: present
 
+  # #
+  # # run 'chage -d 0 myusername' command for newly created users only, so they are forced to change their password:
+  # # https://serverfault.com/questions/1106276/ansible-how-to-run-subsequent-task-for-only-newly-created-users
+  # #
   # - name: force change password
   #   command: 'chage -d 0 etienneg'
   #   when: item.changed
@@ -28,6 +28,8 @@
     user:
       name: ansible-deploy
       system: yes
+      shell: /bin/false
+      create_home: no
       state: present
 
   - name: 'adding ansible-deploy user to sudoers list'
@@ -56,6 +58,7 @@
       owner: root
       group: root
       mode: 0644
+      backup: yes
 
   - name: 'restarting gdm3 service'
     service:
