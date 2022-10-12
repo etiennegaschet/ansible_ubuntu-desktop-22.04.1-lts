@@ -241,7 +241,7 @@
   - name: 'users config: unzipping "CodeNewRoman" font archive'
     ansible.builtin.unarchive:
       src: "fonts/CodeNewRoman.zip"
-      dest: /home/{{ item }}/.fonts"
+      dest: "/home/{{ item }}/.fonts"
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0644'
