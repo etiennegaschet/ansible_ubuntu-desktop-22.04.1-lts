@@ -126,9 +126,14 @@
     ansible.builtin.snap:
       state: present
       name:
-        - code
         - notepadqq
         # - docker
+
+  - name: 'snap packages: install vscode with --classic option'
+    ansible.builtin.snap:
+      state: present
+      name: code
+      classic: true
 
   - name: 'snap packages: install desktop tools'
     ansible.builtin.snap:
