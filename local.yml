@@ -8,6 +8,7 @@
 # ################################
 # apt-get update && apt-get upgrade
 # ################################
+
   - name: 'apt-get: updating and upgrading'
     ansible.builtin.apt:
       force_apt_get: yes
@@ -15,8 +16,39 @@
       update_cache: yes
 
 # ################################
+# locale-gen and localectl
+# ################################
+
+  - name: 'locale-gen: fr_FR (ISO-8859-1)'
+    community.general.locale_gen:
+      state: present
+      name: fr_FR
+
+  - name: 'locale-gen: fr_FR.UTF-8'
+    community.general.locale_gen:
+      state: present
+      name: fr_FR.UTF-8
+
+  - name: 'locale-gen: en_US (ISO-8859-1)'
+    community.general.locale_gen:
+      state: present
+      name: en_US
+
+  - name: 'locale-gen: en_US.UTF-8'
+    community.general.locale_gen:
+      state: present
+      name: en_US.UTF-8
+
+  - name: 'localectl: configure locale and language'
+    ansible.builtin.command: localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US
+
+  - name: 'localectl: set-x11-keymap'
+    ansible.builtin.command: localectl set-x11-keymap fr
+
+# ################################
 # ubuntu-desktop
 # ################################
+
   - name: 'apt packages: install ubuntu-desktop'
     ansible.builtin.package:
       state: present
@@ -25,6 +57,7 @@
 # ################################
 # users
 # ################################
+
   - name: 'users: creating "etienneg"'
     ansible.builtin.user:
       state: present
@@ -49,6 +82,7 @@
 # ################################
 # system config
 # ################################
+
   - name: 'system config: disabling Wayland and setting Xorg as default display server'
     ansible.builtin.copy:
       src: files/etc/gdm3/custom.conf
@@ -66,6 +100,7 @@
 # ################################
 # apt packages
 # ################################
+
   - name: 'apt packages: install CLI development tools'
     ansible.builtin.package:
       state: present
@@ -86,6 +121,7 @@
 # ################################
 # snap packages
 # ################################
+
   - name: 'snap packages: install GUI development tools'
     ansible.builtin.snap:
       state: present
@@ -106,6 +142,7 @@
 # ################################
 # users config
 # ################################
+
   - name: 'users config: adding user "ansible-deploy" to sudoers list'
     ansible.builtin.copy:
       src: files/etc/sudoers.d/ansible-deploy
@@ -125,6 +162,7 @@
 # ################################
 # apt-get autoclean && apt-get autoremove && apt-get clean
 # ################################
+
   - name: 'apt-get autoclean: remove useless packages from the cache'
     ansible.builtin.apt:
       force_apt_get: yes
@@ -143,6 +181,7 @@
 # ################################
 # handlers
 # ################################
+
   # handlers:
   #   - name: 'handlers: forcing new users to change their password on first login'
   #     shell: chage -d 0 {{ item.name }}
