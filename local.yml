@@ -10,6 +10,7 @@
 # ################################
   - name: 'apt packages: install ubuntu-desktop'
     package:
+      state: present
       name: ubuntu-desktop
 
 # ################################
@@ -26,8 +27,8 @@
       update_password: on_create
     loop:
       - etienneg
-    register: users_forced_to_change_password
-    notify: change password
+    # register: users_forced_to_change_password
+    # notify: change password
 
   - name: 'users: creating "ansible-deploy"'
     user:
@@ -50,14 +51,15 @@
 
   - name: 'system config: restarting gdm3 service'
     service:
-      name: gdm3
       state: restarted
+      name: gdm3
 
 # ################################
 # apt packages
 # ################################
   - name: 'apt packages: install CLI development tools'
     package:
+      state: present
       name:
         - jq
         - tree
@@ -67,6 +69,7 @@
 
   - name: 'apt packages: install GUI development tools'
     package:
+      state: present
       name:
         - virtualbox
         - rabbitvcs-nautilus
@@ -76,6 +79,7 @@
 # ################################
   - name: 'snap packages: install GUI development tools'
     snap:
+      state: present
       name:
         - code
         - notepadqq
@@ -83,6 +87,7 @@
 
   - name: 'snap packages: install desktop tools'
     snap:
+      state: present
       name:
         - brave
         - blueman
@@ -102,6 +107,7 @@
 
   - name: 'users config: adding ansible-pull cron job for user "ansible-deploy"'
     cron:
+      state: present
       name: 'ansible auto-provision'
       user: ansible-deploy
       minute: '*/10'
