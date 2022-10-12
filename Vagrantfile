@@ -5,13 +5,9 @@ echo Starting provisioning...
 echo Installing Desktop
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
 
 apt-get install -y software-properties-common
 apt-get install -y ansible
-
-apt-get clean
-apt-get autoremove
 
 locale-gen en_US
 locale-gen en_US.UTF-8

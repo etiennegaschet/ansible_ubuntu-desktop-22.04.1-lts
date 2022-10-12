@@ -6,10 +6,19 @@
   tasks:
 
 # ################################
+# apt-get update && apt-get upgrade
+# ################################
+  - name: 'apt-get: updating and upgrading'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      upgrade: yes
+      update_cache: yes
+
+# ################################
 # ubuntu-desktop
 # ################################
   - name: 'apt packages: install ubuntu-desktop'
-    package:
+    ansible.builtin.package:
       state: present
       name: ubuntu-desktop
 
@@ -17,7 +26,7 @@
 # users
 # ################################
   - name: 'users: creating "etienneg"'
-    user:
+    ansible.builtin.user:
       state: present
       name: "{{ item }}"
       shell: /bin/bash
@@ -31,7 +40,7 @@
     # notify: change password
 
   - name: 'users: creating "ansible-deploy"'
-    user:
+    ansible.builtin.user:
       state: present
       name: ansible-deploy
       system: yes
@@ -41,7 +50,7 @@
 # system config
 # ################################
   - name: 'system config: disabling Wayland and setting Xorg as default display server'
-    copy:
+    ansible.builtin.copy:
       src: files/etc/gdm3/custom.conf
       dest: /etc/gdm3/custom.conf
       owner: root
@@ -50,7 +59,7 @@
       backup: yes
 
   - name: 'system config: restarting gdm3 service'
-    service:
+    ansible.builtin.service:
       state: restarted
       name: gdm3
 
@@ -58,7 +67,7 @@
 # apt packages
 # ################################
   - name: 'apt packages: install CLI development tools'
-    package:
+    ansible.builtin.package:
       state: present
       name:
         - jq
@@ -68,7 +77,7 @@
         - python3-pip
 
   - name: 'apt packages: install GUI development tools'
-    package:
+    ansible.builtin.package:
       state: present
       name:
         - virtualbox
@@ -78,7 +87,7 @@
 # snap packages
 # ################################
   - name: 'snap packages: install GUI development tools'
-    snap:
+    ansible.builtin.snap:
       state: present
       name:
         - code
@@ -86,7 +95,7 @@
         # - docker
 
   - name: 'snap packages: install desktop tools'
-    snap:
+    ansible.builtin.snap:
       state: present
       name:
         - brave
@@ -98,7 +107,7 @@
 # users config
 # ################################
   - name: 'users config: adding user "ansible-deploy" to sudoers list'
-    copy:
+    ansible.builtin.copy:
       src: files/etc/sudoers.d/ansible-deploy
       dest: /etc/sudoers.d/ansible-deploy
       owner: root
@@ -106,12 +115,30 @@
       mode: 0440
 
   - name: 'users config: adding ansible-pull cron job for user "ansible-deploy"'
-    cron:
+    ansible.builtin.cron:
       state: present
       name: 'ansible auto-provision'
       user: ansible-deploy
       minute: '*/10'
       job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
+
+# ################################
+# apt-get autoclean && apt-get autoremove && apt-get clean
+# ################################
+  - name: 'apt-get autoclean: remove useless packages from the cache'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      autoclean: yes
+
+  - name: 'apt-get autoremove: remove dependencies that are no longer required'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      autoremove: yes
+
+  - name: 'apt-get clean: '
+    ansible.builtin.apt:
+      force_apt_get: yes
+      clean: yes
 
 # ################################
 # handlers
