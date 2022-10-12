@@ -2,6 +2,9 @@
 - hosts: localhost
   connection: local
   become: true
+  vars:
+    list_users:
+      - etienneg
 
   tasks:
 
@@ -63,17 +66,17 @@
 # users
 # ################################
 
-  - name: 'users: creating "etienneg"'
+  - name: 'users: creating users'
     ansible.builtin.user:
       state: present
       name: "{{ item }}"
       shell: /bin/bash
+      home: "/home/{{ item }}"
       append: yes
       groups: adm,cdrom,sudo,dip,plugdev,lpadmin,lxd
       password: '$6$bc.dsTpAG4tmqRK6$o8dO2F8vjgOTWvykliZst04Iwp./Dl1MLHxfrFEJ0XVQCnwP2kUFGb.33ADvq5Y0gq0WXYANOQZuer22NXxx90'
       update_password: on_create
-    loop:
-      - etienneg
+    loop: "{{ list_users }}"
     # register: users_forced_to_change_password
     # notify: change password
 
@@ -190,24 +193,79 @@
 # users config
 # ################################
 
-  - name: 'users config: copying ".bashrc" for user "etienneg"'
-    ansible.builtin.copy:
-      src: files/home/etienneg/.bashrc
-      dest: /home/etienneg/.bashrc
-      owner: etienneg
-      group: etienneg
-      mode: 0644
+  - name: 'users config: creating "~/.fonts" directory'
+    ansible.builtin.file:
+      state: directory
+      path: "/home/{{ item }}/.fonts"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: '0775'
+    loop: "{{ list_users }}"
 
-  - name: 'setting resolution'
-    # ansible.builtin.command: 'xrandr --output $(xrandr | grep -e " connected [^(]" | sed -e "s/\([A-Z0-9]\+\) connected.*/\1/") --mode "1920x1080"'
-    ansible.builtin.command: 'xrandr --output $(xrandr | grep -e " connected [^(]" | sed -e "s/\([A-Z0-9]\+\) connected.*/\1/") --mode "1360x768"'
-    become_user: etienneg
+  - name: 'users config: unzipping "CodeNewRoman" font archive'
+    ansible.builtin.unarchive:
+      src: "fonts/CodeNewRoman.zip"
+      dest: /home/{{ item }}/.fonts"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: '0644'
+    loop: "{{ list_users }}"
+
+  - name: 'users config: Update the font cache'
+    ansible.builtin.command: fc-cache -fv
+
+  - name: 'users config: copying "~/.bash_aliases"'
+    ansible.builtin.copy:
+      src: "files/home/user/.bash_aliases"
+      dest: "/home/{{ item }}/.bash_aliases"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: 0644
+    loop: "{{ list_users }}"
+
+  - name: 'users config: copying "~/.bashrc"'
+    ansible.builtin.copy:
+      src: "files/home/user/.bashrc"
+      dest: "/home/{{ item }}/.bashrc"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: 0644
+    loop: "{{ list_users }}"
+
+  - name: 'users config: copying "~/.profile"'
+    ansible.builtin.copy:
+      src: "files/home/user/.profile"
+      dest: "/home/{{ item }}/.profile"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: 0644
+    loop: "{{ list_users }}"
+
+  - name: 'users config: copying "~/.bash_logout"'
+    ansible.builtin.copy:
+      src: "files/home/user/.bash_logout"
+      dest: "/home/{{ item }}/.bash_logout"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: 0644
+    loop: "{{ list_users }}"
+
+
+  - name: 'users config: copying "~/.config/monitors.xml" (setting screen resolution)'
+    ansible.builtin.copy:
+      # src: "files/home/user/.config/monitors.xml"
+      src: "files/home/user/.config/monitors-vagrant.xml"
+      dest: "/home/{{ item }}/.config/monitors.xml"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: 0664
+    loop: "{{ list_users }}"
 
 # ################################
 # ansible auto-provision
 # ################################
 
-  - name: 'users config: adding user "ansible-deploy" to sudoers list'
+  - name: 'ansible auto-provision: adding user "ansible-deploy" to sudoers list'
     ansible.builtin.copy:
       src: files/etc/sudoers.d/ansible-deploy
       dest: /etc/sudoers.d/ansible-deploy
@@ -215,7 +273,7 @@
       group: root
       mode: 0440
 
-  - name: 'users config: adding ansible-pull cron job for user "ansible-deploy"'
+  - name: 'ansible auto-provision: adding ansible-pull cron job for user "ansible-deploy"'
     ansible.builtin.cron:
       state: present
       name: 'ansible auto-provision'
