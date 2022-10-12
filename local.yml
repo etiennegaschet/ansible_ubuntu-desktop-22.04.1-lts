@@ -6,39 +6,11 @@
   tasks:
 
 # ################################
-# apt packages
+# ubuntu-desktop
 # ################################
   - name: 'apt packages: install ubuntu-desktop'
     package:
       name: ubuntu-desktop
-
-  - name: 'apt packages: install CLI development tools'
-    package:
-      name:
-        - jq
-        - tree
-        - shellcheck
-        - libsecret-tools
-        - python3-pip
-
-# ################################
-# snap packages
-# ################################
-  - name: 'snap packages: install GUI development tools'
-    snap:
-      name:
-        - code
-        - notepadq
-        - VirtualBox
-        # - docker
-        # - rabbitvcs
-
-  - name: 'snap packages: install desktop tools'
-    snap:
-      name:
-        - brave
-        - blueman
-        # - teams / teams-for-linux
 
 # ################################
 # users
@@ -63,6 +35,37 @@
       name: ansible-deploy
       system: yes
       shell: /bin/false
+
+# ################################
+# apt packages
+# ################################
+  - name: 'apt packages: install CLI development tools'
+    package:
+      name:
+        - jq
+        - tree
+        - shellcheck
+        - libsecret-tools
+        - python3-pip
+
+# ################################
+# snap packages
+# ################################
+  - name: 'snap packages: install GUI development tools'
+    snap:
+      name:
+        - code
+        - notepadqq
+        - VirtualBox
+        # - docker
+        # - rabbitvcs
+
+  - name: 'snap packages: install desktop tools'
+    snap:
+      name:
+        - brave
+        - blueman
+        # - teams / teams-for-linux
 
 # ################################
 # system config
