@@ -26,8 +26,8 @@
       update_password: on_create
     loop:
       - etienneg
-    # register: users_forced_to_change_password
-    # notify: change password
+    register: users_forced_to_change_password
+    notify: change password
 
   - name: 'users: creating "ansible-deploy"'
     user:
@@ -35,37 +35,6 @@
       name: ansible-deploy
       system: yes
       shell: /bin/false
-
-# ################################
-# apt packages
-# ################################
-  - name: 'apt packages: install CLI development tools'
-    package:
-      name:
-        - jq
-        - tree
-        - shellcheck
-        - libsecret-tools
-        - python3-pip
-
-# ################################
-# snap packages
-# ################################
-  - name: 'snap packages: install GUI development tools'
-    snap:
-      name:
-        - code
-        - notepadqq
-        - VirtualBox
-        # - docker
-        # - rabbitvcs
-
-  - name: 'snap packages: install desktop tools'
-    snap:
-      name:
-        - brave
-        - blueman
-        # - teams / teams-for-linux
 
 # ################################
 # system config
@@ -83,6 +52,42 @@
     service:
       name: gdm3
       state: restarted
+
+# ################################
+# apt packages
+# ################################
+  - name: 'apt packages: install CLI development tools'
+    package:
+      name:
+        - jq
+        - tree
+        - shellcheck
+        - libsecret-tools
+        - python3-pip
+
+  - name: 'apt packages: install GUI development tools'
+    package:
+      name:
+        - virtualbox
+        - rabbitvcs-nautilus
+
+# ################################
+# snap packages
+# ################################
+  - name: 'snap packages: install GUI development tools'
+    snap:
+      name:
+        - code
+        - notepadqq
+        # - docker
+
+  - name: 'snap packages: install desktop tools'
+    snap:
+      name:
+        - brave
+        - blueman
+        - teams
+        # - teams / teams-for-linux
 
 # ################################
 # users config
@@ -105,9 +110,9 @@
 # ################################
 # handlers
 # ################################
-  handlers:
-    - name: 'handlers: forcing new users to change their password on first login'
-      shell: chage -d 0 {{ item.name }}
-      loop: "{{ users_forced_to_change_password.results }}"
-      when: item.changed
-      listen: change password
+  # handlers:
+  #   - name: 'handlers: forcing new users to change their password on first login'
+  #     shell: chage -d 0 {{ item.name }}
+  #     loop: "{{ users_forced_to_change_password.results }}"
+  #     when: item.changed
+  #     listen: change password
