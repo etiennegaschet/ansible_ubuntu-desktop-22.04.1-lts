@@ -6,20 +6,6 @@
   tasks:
 
 # ################################
-# apt-get update && apt-get upgrade
-# ################################
-
-  - name: 'apt-get update'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      update_cache: yes
-
-  - name: 'apt-get upgrade'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      upgrade: yes
-
-# ################################
 # locale-gen and localectl
 # ################################
 
@@ -48,6 +34,20 @@
 
   - name: 'localectl: set-x11-keymap'
     ansible.builtin.command: localectl set-x11-keymap fr
+
+# ################################
+# apt-get update && apt-get upgrade
+# ################################
+
+  - name: 'apt-get update'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      update_cache: yes
+
+  - name: 'apt-get upgrade'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      upgrade: yes
 
 # ################################
 # ubuntu-desktop
@@ -83,24 +83,6 @@
       name: ansible-deploy
       system: yes
       shell: /bin/false
-
-# ################################
-# system config
-# ################################
-
-  - name: 'system config: disabling Wayland and setting Xorg as default display server'
-    ansible.builtin.copy:
-      src: files/etc/gdm3/custom.conf
-      dest: /etc/gdm3/custom.conf
-      owner: root
-      group: root
-      mode: 0644
-      backup: yes
-
-  - name: 'system config: restarting gdm3 service'
-    ansible.builtin.service:
-      state: restarted
-      name: gdm3
 
 # ################################
 # apt packages
@@ -153,11 +135,76 @@
     community.general.snap:
       state: present
       name:
+        - snap-store
         - brave
         - teams
 
 # ################################
+# pip packages
+# ################################
+
+  - name: 'pip packages: install CLI development tools'
+    ansible.builtin.pip:
+      state: present
+      name:
+        - powerline-shell
+
+# ################################
+# apt-get autoclean && apt-get autoremove && apt-get clean
+# ################################
+
+  - name: 'apt-get autoclean: remove useless packages from the cache'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      autoclean: yes
+
+  - name: 'apt-get autoremove: remove dependencies that are no longer required'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      autoremove: yes
+
+  # - name: 'apt-get clean'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     clean: yes
+
+# ################################
+# system config
+# ################################
+
+  - name: 'system config: disabling Wayland and setting Xorg as default display server'
+    ansible.builtin.copy:
+      src: files/etc/gdm3/custom.conf
+      dest: /etc/gdm3/custom.conf
+      owner: root
+      group: root
+      mode: 0644
+      backup: yes
+
+  - name: 'system config: restarting gdm3 service'
+    ansible.builtin.service:
+      state: restarted
+      name: gdm3
+
+# ################################
 # users config
+# ################################
+
+  - name: 'users config: copying ".bashrc" for user "etienneg"'
+    ansible.builtin.copy:
+      src: files/home/etienneg/.bashrc
+      dest: /home/etienneg/.bashrc
+      owner: etienneg
+      group: etienneg
+      mode: 0644
+
+  - name: 'setting resolution'
+    # ansible.builtin.command: 'xrandr --output $(xrandr | grep -e " connected [^(]" | sed -e "s/\([A-Z0-9]\+\) connected.*/\1/") --mode "1920x1080"'
+    ansible.builtin.command: 'xrandr --output $(xrandr | grep -e " connected [^(]" | sed -e "s/\([A-Z0-9]\+\) connected.*/\1/") --mode "1360x768"'
+    become_user: etienneg
+
+# ################################
+# ansible auto-provision
 # ################################
 
   - name: 'users config: adding user "ansible-deploy" to sudoers list'
@@ -177,23 +224,12 @@
       job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
 
 # ################################
-# apt-get autoclean && apt-get autoremove && apt-get clean
+# system reboot
 # ################################
 
-  - name: 'apt-get autoclean: remove useless packages from the cache'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      autoclean: yes
-
-  - name: 'apt-get autoremove: remove dependencies that are no longer required'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      autoremove: yes
-
-  - name: 'apt-get clean'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      clean: yes
+  - name: 'system reboot'
+    ansible.builtin.reboot:
+      reboot_timeout: 10
 
 # ################################
 # handlers
