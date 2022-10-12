@@ -9,11 +9,15 @@
 # apt-get update && apt-get upgrade
 # ################################
 
-  - name: 'apt-get: updating and upgrading'
+  - name: 'apt-get update'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      update_cache: yes
+
+  - name: 'apt-get upgrade'
     ansible.builtin.apt:
       force_apt_get: yes
       upgrade: yes
-      update_cache: yes
 
 # ################################
 # locale-gen and localectl
@@ -50,8 +54,9 @@
 # ################################
 
   - name: 'apt packages: install ubuntu-desktop'
-    ansible.builtin.package:
+    ansible.builtin.apt:
       state: present
+      force_apt_get: yes
       name: ubuntu-desktop
 
 # ################################
@@ -102,9 +107,11 @@
 # ################################
 
   - name: 'apt packages: install CLI development tools'
-    ansible.builtin.package:
+    ansible.builtin.apt:
       state: present
+      force_apt_get: yes
       name:
+        - git
         - jq
         - tree
         - shellcheck
@@ -112,37 +119,42 @@
         - python3-pip
 
   - name: 'apt packages: install GUI development tools'
-    ansible.builtin.package:
+    ansible.builtin.apt:
       state: present
+      force_apt_get: yes
       name:
         - virtualbox
         - rabbitvcs-nautilus
+
+  - name: 'apt packages: install desktop tools'
+    ansible.builtin.apt:
+      state: present
+      force_apt_get: yes
+      name:
+        - blueman
 
 # ################################
 # snap packages
 # ################################
 
   - name: 'snap packages: install GUI development tools'
-    ansible.builtin.snap:
+    community.general.snap:
       state: present
       name:
         - notepadqq
-        # - docker
 
   - name: 'snap packages: install vscode with --classic option'
-    ansible.builtin.snap:
+    community.general.snap:
       state: present
       name: code
       classic: true
 
   - name: 'snap packages: install desktop tools'
-    ansible.builtin.snap:
+    community.general.snap:
       state: present
       name:
         - brave
-        - blueman
         - teams
-        # - teams / teams-for-linux
 
 # ################################
 # users config
@@ -178,7 +190,7 @@
       force_apt_get: yes
       autoremove: yes
 
-  - name: 'apt-get clean: '
+  - name: 'apt-get clean'
     ansible.builtin.apt:
       force_apt_get: yes
       clean: yes
