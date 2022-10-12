@@ -42,15 +42,15 @@
 # apt-get update && apt-get upgrade
 # ################################
 
-  - name: 'apt-get update'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      update_cache: yes
+  # - name: 'apt-get update'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     update_cache: yes
 
-  - name: 'apt-get upgrade'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      upgrade: yes
+  # - name: 'apt-get upgrade'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     upgrade: yes
 
 # ################################
 # ubuntu-desktop
@@ -156,15 +156,15 @@
 # apt-get autoclean && apt-get autoremove && apt-get clean
 # ################################
 
-  - name: 'apt-get autoclean: remove useless packages from the cache'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      autoclean: yes
+  # - name: 'apt-get autoclean: remove useless packages from the cache'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     autoclean: yes
 
-  - name: 'apt-get autoremove: remove dependencies that are no longer required'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      autoremove: yes
+  # - name: 'apt-get autoremove: remove dependencies that are no longer required'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     autoremove: yes
 
   # - name: 'apt-get clean'
   #   ansible.builtin.apt:
@@ -193,26 +193,14 @@
 # users config
 # ################################
 
-  - name: 'users config: creating "~/.fonts" directory'
-    ansible.builtin.file:
-      state: directory
-      path: "/home/{{ item }}/.fonts"
+  - name: 'users config: copying "~/.bash_logout"'
+    ansible.builtin.copy:
+      src: "files/home/user/.bash_logout"
+      dest: "/home/{{ item }}/.bash_logout"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: '0775'
+      mode: 0644
     loop: "{{ list_users }}"
-
-  - name: 'users config: unzipping "CodeNewRoman" font archive'
-    ansible.builtin.unarchive:
-      src: "fonts/CodeNewRoman.zip"
-      dest: /home/{{ item }}/.fonts"
-      owner: "{{ item }}"
-      group: "{{ item }}"
-      mode: '0644'
-    loop: "{{ list_users }}"
-
-  - name: 'users config: Update the font cache'
-    ansible.builtin.command: fc-cache -fv
 
   - name: 'users config: copying "~/.bash_aliases"'
     ansible.builtin.copy:
@@ -241,15 +229,26 @@
       mode: 0644
     loop: "{{ list_users }}"
 
-  - name: 'users config: copying "~/.bash_logout"'
-    ansible.builtin.copy:
-      src: "files/home/user/.bash_logout"
-      dest: "/home/{{ item }}/.bash_logout"
+  - name: 'users config: creating "~/.fonts" directory'
+    ansible.builtin.file:
+      state: directory
+      path: "/home/{{ item }}/.fonts"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: 0644
+      mode: '0775'
     loop: "{{ list_users }}"
 
+  - name: 'users config: unzipping "CodeNewRoman" font archive'
+    ansible.builtin.unarchive:
+      src: "fonts/CodeNewRoman.zip"
+      dest: /home/{{ item }}/.fonts"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: '0644'
+    loop: "{{ list_users }}"
+
+  - name: 'users config: updating the font cache'
+    ansible.builtin.command: fc-cache -fv
 
   - name: 'users config: copying "~/.config/monitors.xml" (setting screen resolution)'
     ansible.builtin.copy:
