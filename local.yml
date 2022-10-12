@@ -5,7 +5,45 @@
 
   tasks:
 
-  - name: 'creating user: etienneg'
+# ################################
+# apt packages
+# ################################
+  - name: 'apt packages: install ubuntu-desktop'
+    package:
+      name: ubuntu-desktop
+
+  - name: 'apt packages: install CLI development tools'
+    package:
+      name:
+        - jq
+        - tree
+        - shellcheck
+        - libsecret-tools
+        - python3-pip
+
+# ################################
+# snap packages
+# ################################
+  - name: 'snap packages: install GUI development tools'
+    snap:
+      name:
+        - code
+        - notepadq
+        - VirtualBox
+        # - docker
+        # - rabbitvcs
+
+  - name: 'snap packages: install desktop tools'
+    snap:
+      name:
+        - brave
+        - blueman
+        # - teams / teams-for-linux
+
+# ################################
+# users
+# ################################
+  - name: 'users: creating "etienneg"'
     user:
       state: present
       name: "{{ item }}"
@@ -16,36 +54,20 @@
       update_password: on_create
     loop:
       - etienneg
-    register: users_forced_to_change_password
-    notify: change password
+    # register: users_forced_to_change_password
+    # notify: change password
 
-  - name: 'creating user: ansible-deploy'
+  - name: 'users: creating "ansible-deploy"'
     user:
       state: present
       name: ansible-deploy
       system: yes
       shell: /bin/false
 
-  - name: 'adding ansible-deploy user to sudoers list'
-    copy:
-      src: files/etc/sudoers.d/ansible-deploy
-      dest: /etc/sudoers.d/ansible-deploy
-      owner: root
-      group: root
-      mode: 0440
-
-  - name: 'adding ansible-pull cron job for user ansible-deploy'
-    cron:
-      name: 'ansible auto-provision'
-      user: ansible-deploy
-      minute: '*/10'
-      job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
-
-  - name: 'install ubuntu-desktop'
-    package:
-      name: ubuntu-desktop
-
-  - name: 'disabling Wayland and setting Xorg as default display server'
+# ################################
+# system config
+# ################################
+  - name: 'system config: disabling Wayland and setting Xorg as default display server'
     copy:
       src: files/etc/gdm3/custom.conf
       dest: /etc/gdm3/custom.conf
@@ -54,41 +76,34 @@
       mode: 0644
       backup: yes
 
-  - name: 'restarting gdm3 service'
+  - name: 'system config: restarting gdm3 service'
     service:
       name: gdm3
       state: restarted
 
-  - name: install jq
-    package:
-      name:
-        - jq
+# ################################
+# users config
+# ################################
+  - name: 'users config: adding user "ansible-deploy" to sudoers list'
+    copy:
+      src: files/etc/sudoers.d/ansible-deploy
+      dest: /etc/sudoers.d/ansible-deploy
+      owner: root
+      group: root
+      mode: 0440
 
-  # - name: install shellcheck
-  #   package:
-  #     name:
-  #       - shellcheck
+  - name: 'users config: adding ansible-pull cron job for user "ansible-deploy"'
+    cron:
+      name: 'ansible auto-provision'
+      user: ansible-deploy
+      minute: '*/10'
+      job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
 
-  # - name: install CLI tools
-  #   package:
-  #     name:
-  #       - jq
-  #       - libsecret-tools
-  #       - shellcheck
-  #       - python3-pip
-
-  # - name: install Desktop tools
-  #   package:
-  #     name:
-  #       - 
-
-  # - name: install Desktop tools via snap
-  #   package:
-  #     name:
-  #       - blueman
-
+# ################################
+# handlers
+# ################################
   handlers:
-    - name: 'forcing new users to change their password on first login'
+    - name: 'handlers: forcing new users to change their password on first login'
       shell: chage -d 0 {{ item.name }}
       loop: "{{ users_forced_to_change_password.results }}"
       when: item.changed
