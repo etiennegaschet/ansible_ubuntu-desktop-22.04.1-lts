@@ -62,15 +62,16 @@
       - 'teams'
 
     list_packages_snap_classic_mode:
+      # installs GUI development tools:
       - 'code'
 
     list_packages_pip:
-      # installs CLI development tools
+      # installs CLI development tools:
       - 'powerline-shell'
 
-    # file_config_user_monitor: monitors-1920x1080.xml
-    # file_config_user_monitor: monitors-vagrant-1360x768.xml
-    file_config_user_monitor: 'monitors-vagrant-1280x960.xml'
+    # file_config_user_monitor: 'monitors.xml.laptop-1920x1080'
+    # file_config_user_monitor: 'monitors.xml.vagrant-1360x768'
+    file_config_user_monitor: 'monitors.xml.vagrant-1280x960'
 
   tasks:
 
