@@ -21,7 +21,7 @@
 
     list_packages_apt_repositories:
       # adds docker repository:
-      - 'deb https://download.docker.com/linux/ubuntu focal stable'
+      - 'deb https://download.docker.com/linux/ubuntu jammy stable'
 
     list_packages_apt:
       # installs a desktop environment:
