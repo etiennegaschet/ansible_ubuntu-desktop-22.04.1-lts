@@ -2,35 +2,70 @@
 - hosts: localhost
   connection: local
   become: true
+
+  # - name: Install a .deb package from the internet
+  # ansible.builtin.apt:
+  #   deb: https://example.com/python-ppq_0.1-1_all.deb
+  # https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb
+
   vars:
-    list_users:
+
+    list_system_locales:
+      - en_US
+      - en_US.UTF-8
+      - fr_FR
+      - fr_FR.UTF-8
+
+    list_system_users:
       - etienneg
+
+    list_packages_apt_ubuntu:
+      - ubuntu-desktop
+
+    list_packages_apt_cli_development:
+      - git
+      - jq
+      - tree
+      - shellcheck
+      - libsecret-tools
+      - python3-pip
+
+    list_packages_apt_gui_development:
+      - virtualbox
+      - rabbitvcs-nautilus
+
+    list_packages_apt_desktop:
+      - blueman
+
+    list_packages_snap_gui_development:
+      - notepadqq
+
+    list_packages_snap_gui_development_classic:
+      - code
+
+    list_packages_snap_desktop:
+      - snap-store
+      - brave
+      - teams
+
+    list_packages_pip_cli_development:
+      - powerline-shell
+
+    # file_config_user_monitor: monitors-1920x1080.xml
+    # file_config_user_monitor: monitors-vagrant-1360x768.xml
+    file_config_user_monitor: "monitors-vagrant-1280x960.xml"
 
   tasks:
 
-# ################################
-# locale-gen and localectl
-# ################################
+    # ################################
+    # locale-gen and localectl
+    # ################################
 
-  - name: 'locale-gen: fr_FR (ISO-8859-1)'
+  - name: 'locale-gen'
     community.general.locale_gen:
       state: present
-      name: fr_FR
-
-  - name: 'locale-gen: fr_FR.UTF-8'
-    community.general.locale_gen:
-      state: present
-      name: fr_FR.UTF-8
-
-  - name: 'locale-gen: en_US (ISO-8859-1)'
-    community.general.locale_gen:
-      state: present
-      name: en_US
-
-  - name: 'locale-gen: en_US.UTF-8'
-    community.general.locale_gen:
-      state: present
-      name: en_US.UTF-8
+      name: "{{ item }}"
+    loop: "{{ list_system_locales }}"
 
   - name: 'localectl: configure locale and language'
     ansible.builtin.command: localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US
@@ -38,33 +73,111 @@
   - name: 'localectl: set-x11-keymap'
     ansible.builtin.command: localectl set-x11-keymap fr
 
-# ################################
-# apt-get update && apt-get upgrade
-# ################################
+    # ################################
+    # apt-get update && apt-get upgrade
+    # ################################
 
-  # - name: 'apt-get update'
-  #   ansible.builtin.apt:
-  #     force_apt_get: yes
-  #     update_cache: yes
+  - name: 'apt-get update'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      update_cache: yes
 
-  # - name: 'apt-get upgrade'
-  #   ansible.builtin.apt:
-  #     force_apt_get: yes
-  #     upgrade: yes
+  - name: 'apt-get upgrade'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      upgrade: yes
 
-# ################################
-# ubuntu-desktop
-# ################################
+    # ################################
+    # ubuntu-desktop
+    # ################################
 
-  - name: 'apt packages: install ubuntu-desktop'
+  - name: 'apt packages: installing desktop'
     ansible.builtin.apt:
       state: present
       force_apt_get: yes
-      name: ubuntu-desktop
+      name: "{{ item }}"
+    loop: "{{ list_packages_apt_ubuntu }}"
 
-# ################################
-# users
-# ################################
+    # ################################
+    # apt packages
+    # ################################
+
+  - name: 'apt packages: install CLI development tools'
+    ansible.builtin.apt:
+      state: present
+      force_apt_get: yes
+      name: "{{ item }}"
+    loop: "{{ list_packages_apt_cli_development }}"
+
+  - name: 'apt packages: install GUI development tools'
+    ansible.builtin.apt:
+      state: present
+      force_apt_get: yes
+      name: "{{ item }}"
+    loop: "{{ list_packages_apt_gui_development }}"
+
+  - name: 'apt packages: install desktop tools'
+    ansible.builtin.apt:
+      state: present
+      force_apt_get: yes
+      name: "{{ item }}"
+    loop: "{{ list_packages_apt_desktop }}"
+
+    # ################################
+    # snap packages
+    # ################################
+
+  - name: 'snap packages: install GUI development tools'
+    community.general.snap:
+      state: present
+      name: "{{ item }}"
+    loop: "{{ list_packages_snap_gui_development }}"
+
+  - name: 'snap packages: install vscode with --classic option'
+    community.general.snap:
+      state: present
+      classic: true
+      name: "{{ item }}"
+    loop: "{{ list_packages_snap_gui_development_classic }}"
+
+  - name: 'snap packages: install desktop tools'
+    community.general.snap:
+      state: present
+      name: "{{ item }}"
+    loop: "{{ list_packages_snap_desktop }}"
+
+    # ################################
+    # pip packages
+    # ################################
+
+  - name: 'pip packages: install CLI development tools'
+    ansible.builtin.pip:
+      state: present
+      name: "{{ item }}"
+    loop: "{{ list_packages_pip_cli_development }}"
+
+    # ################################
+    # apt-get autoclean && apt-get autoremove && apt-get clean
+    # ################################
+
+  - name: 'apt-get autoclean: remove useless packages from the cache'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      autoclean: yes
+
+  - name: 'apt-get autoremove: remove dependencies that are no longer required'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      autoremove: yes
+
+  # - name: 'apt-get clean'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     clean: yes
+
+    # ################################
+    # users
+    # ################################
 
   - name: 'users: creating users'
     ansible.builtin.user:
@@ -76,7 +189,7 @@
       groups: adm,cdrom,sudo,dip,plugdev,lpadmin,lxd
       password: '$6$bc.dsTpAG4tmqRK6$o8dO2F8vjgOTWvykliZst04Iwp./Dl1MLHxfrFEJ0XVQCnwP2kUFGb.33ADvq5Y0gq0WXYANOQZuer22NXxx90'
       update_password: on_create
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
     # register: users_forced_to_change_password
     # notify: change password
 
@@ -87,93 +200,9 @@
       system: yes
       shell: /bin/false
 
-# ################################
-# apt packages
-# ################################
-
-  - name: 'apt packages: install CLI development tools'
-    ansible.builtin.apt:
-      state: present
-      force_apt_get: yes
-      name:
-        - git
-        - jq
-        - tree
-        - shellcheck
-        - libsecret-tools
-        - python3-pip
-
-  - name: 'apt packages: install GUI development tools'
-    ansible.builtin.apt:
-      state: present
-      force_apt_get: yes
-      name:
-        - virtualbox
-        - rabbitvcs-nautilus
-
-  - name: 'apt packages: install desktop tools'
-    ansible.builtin.apt:
-      state: present
-      force_apt_get: yes
-      name:
-        - blueman
-
-# ################################
-# snap packages
-# ################################
-
-  - name: 'snap packages: install GUI development tools'
-    community.general.snap:
-      state: present
-      name:
-        - notepadqq
-
-  - name: 'snap packages: install vscode with --classic option'
-    community.general.snap:
-      state: present
-      name: code
-      classic: true
-
-  - name: 'snap packages: install desktop tools'
-    community.general.snap:
-      state: present
-      name:
-        - snap-store
-        - brave
-        - teams
-
-# ################################
-# pip packages
-# ################################
-
-  - name: 'pip packages: install CLI development tools'
-    ansible.builtin.pip:
-      state: present
-      name:
-        - powerline-shell
-
-# ################################
-# apt-get autoclean && apt-get autoremove && apt-get clean
-# ################################
-
-  # - name: 'apt-get autoclean: remove useless packages from the cache'
-  #   ansible.builtin.apt:
-  #     force_apt_get: yes
-  #     autoclean: yes
-
-  # - name: 'apt-get autoremove: remove dependencies that are no longer required'
-  #   ansible.builtin.apt:
-  #     force_apt_get: yes
-  #     autoremove: yes
-
-  # - name: 'apt-get clean'
-  #   ansible.builtin.apt:
-  #     force_apt_get: yes
-  #     clean: yes
-
-# ################################
-# system config
-# ################################
+    # ################################
+    # system config
+    # ################################
 
   - name: 'system config: disabling Wayland and setting Xorg as default display server'
     ansible.builtin.copy:
@@ -189,9 +218,9 @@
       state: restarted
       name: gdm3
 
-# ################################
-# users config
-# ################################
+    # ################################
+    # users config
+    # ################################
 
   - name: 'users config: copying "~/.bash_logout"'
     ansible.builtin.copy:
@@ -200,7 +229,7 @@
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0644'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
   - name: 'users config: copying "~/.bash_aliases"'
     ansible.builtin.copy:
@@ -209,7 +238,7 @@
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0644'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
   - name: 'users config: copying "~/.bashrc"'
     ansible.builtin.copy:
@@ -218,7 +247,7 @@
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0644'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
   - name: 'users config: copying "~/.profile"'
     ansible.builtin.copy:
@@ -227,7 +256,7 @@
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0644'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
   - name: 'users config: creating "~/.fonts" directory'
     ansible.builtin.file:
@@ -236,7 +265,7 @@
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0755'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
   - name: 'users config: unzipping "CodeNewRoman" font archive'
     ansible.builtin.unarchive:
@@ -245,7 +274,7 @@
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0644'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
   - name: 'users config: updating the font cache'
     ansible.builtin.command: fc-cache -fv
@@ -257,21 +286,20 @@
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0700'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
   - name: 'users config: copying "~/.config/monitors.xml" (setting screen resolution)'
     ansible.builtin.copy:
-      # src: "files/home/user/.config/monitors.xml"
-      src: "files/home/user/.config/monitors-vagrant.xml"
+      src: "files/home/user/.config/{{ file_config_user_monitor }}"
       dest: "/home/{{ item }}/.config/monitors.xml"
       owner: "{{ item }}"
       group: "{{ item }}"
       mode: '0644'
-    loop: "{{ list_users }}"
+    loop: "{{ list_system_users }}"
 
-# ################################
-# ansible auto-provision
-# ################################
+    # ################################
+    # ansible auto-provision
+    # ################################
 
   - name: 'ansible auto-provision: adding user "ansible-deploy" to sudoers list'
     ansible.builtin.copy:
@@ -289,17 +317,17 @@
       minute: '*/10'
       job: ansible-pull -o -U https://github.com/etiennegaschet/ansible_ubuntu-desktop-22.04.1-lts.git
 
-# ################################
-# system reboot
-# ################################
+    # ################################
+    # system reboot
+    # ################################
 
   - name: 'system reboot'
     ansible.builtin.reboot:
-      reboot_timeout: 10
+      reboot_timeout: 600
 
-# ################################
-# handlers
-# ################################
+    # ################################
+    # handlers
+    # ################################
 
   # handlers:
   #   - name: 'handlers: forcing new users to change their password on first login'
