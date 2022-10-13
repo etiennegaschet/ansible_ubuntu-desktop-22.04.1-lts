@@ -165,18 +165,32 @@
     loop: "{{ list_packages_pip }}"
 
     # ################################
+    # apt-get update && apt-get upgrade
+    # ################################
+
+  - name: 'apt-get update'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      update_cache: yes
+
+  - name: 'apt-get upgrade'
+    ansible.builtin.apt:
+      force_apt_get: yes
+      upgrade: yes
+
+    # ################################
     # apt-get autoclean && apt-get autoremove && apt-get clean
     # ################################
 
-  - name: 'apt-get autoclean: remove useless packages from the cache'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      autoclean: yes
+  # - name: 'apt-get autoclean: remove useless packages from the cache'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     autoclean: yes
 
-  - name: 'apt-get autoremove: remove dependencies that are no longer required'
-    ansible.builtin.apt:
-      force_apt_get: yes
-      autoremove: yes
+  # - name: 'apt-get autoremove: remove dependencies that are no longer required'
+  #   ansible.builtin.apt:
+  #     force_apt_get: yes
+  #     autoremove: yes
 
   # - name: 'apt-get clean'
   #   ansible.builtin.apt:
