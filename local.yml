@@ -15,39 +15,57 @@
     list_system_users:
       - 'etienneg'
 
-    list_packages_apt_ubuntu:
-      - 'ubuntu-desktop'
+    list_packages_apt_keys:
+      # adds docker GPG apt key:
+      - 'https://download.docker.com/linux/ubuntu/gpg'
 
-    list_packages_apt_cli_development:
+    list_packages_apt_repositories:
+      # adds docker repository:
+      - 'deb https://download.docker.com/linux/ubuntu focal stable'
+
+    list_packages_apt:
+      # installs a desktop environment:
+      - 'ubuntu-desktop'
+      # installs CLI development tools:
       - 'git'
       - 'jq'
       - 'tree'
       - 'shellcheck'
       - 'libsecret-tools'
       - 'python3-pip'
-
-    list_packages_apt_gui_development:
+      # installs GUI development tools:
       - 'virtualbox'
       - 'rabbitvcs-nautilus'
-
-    list_packages_apt_desktop:
+      # installs desktop tools:
       - 'blueman'
+      # installs docker-ce and docker-desktop dependencies:
+      - 'aptitude'
+      - 'apt-transport-https'
+      - 'ca-certificates'
+      - 'curl'
+      - 'software-properties-common'
+      - 'python3-pip'
+      - 'virtualenv'
+      - 'python3-setuptools'
+      # installs docker-ce
+      - 'docker-ce'
 
-    list_packages_apt_url:
+    list_packages_apt_via_url:
       - 'https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb'
 
-    list_packages_snap_gui_development:
+    list_packages_snap:
+      # installs GUI development tools:
       - 'notepadqq'
-
-    list_packages_snap_gui_development_classic:
-      - 'code'
-
-    list_packages_snap_desktop:
+      # installs desktop tools:
       - 'snap-store'
       - 'brave'
       - 'teams'
 
-    list_packages_pip_cli_development:
+    list_packages_snap_classic_mode:
+      - 'code'
+
+    list_packages_pip:
+      # installs CLI development tools
       - 'powerline-shell'
 
     # file_config_user_monitor: monitors-1920x1080.xml
@@ -87,80 +105,63 @@
       upgrade: yes
 
     # ################################
-    # ubuntu-desktop
-    # ################################
-
-  - name: 'apt packages: installing desktop'
-    ansible.builtin.apt:
-      state: present
-      force_apt_get: yes
-      name: "{{ item }}"
-    loop: "{{ list_packages_apt_ubuntu }}"
-
-    # ################################
     # apt packages
     # ################################
 
-  - name: 'apt packages: install CLI development tools'
-    ansible.builtin.apt:
+  - name: 'add GPG apt keys'
+    apt_key:
       state: present
-      force_apt_get: yes
-      name: "{{ item }}"
-    loop: "{{ list_packages_apt_cli_development }}"
+      url: "{{ item }}"
+    loop: "{{ list_packages_apt_keys }}"
 
-  - name: 'apt packages: install GUI development tools'
-    ansible.builtin.apt:
+  - name: 'apt packages: add repositories'
+    apt_repository:
       state: present
-      force_apt_get: yes
-      name: "{{ item }}"
-    loop: "{{ list_packages_apt_gui_development }}"
+      repo: "{{ item }}"
+    loop: "{{ list_packages_apt_repositories }}"
 
-  - name: 'apt packages: install desktop tools'
+  - name: 'apt packages: install via repo'
     ansible.builtin.apt:
       state: present
       force_apt_get: yes
+      update_cache: yes
       name: "{{ item }}"
-    loop: "{{ list_packages_apt_desktop }}"
+    loop: "{{ list_packages_apt }}"
 
-  - name: 'apt packages: install via URL'
+  - name: 'apt packages: install via .deb file URL'
     ansible.builtin.apt:
       state: present
       force_apt_get: yes
+      update_cache: yes
       deb: "{{ item }}"
-    loop: "{{ list_packages_apt_url }}"
+    loop: "{{ list_packages_apt_via_url }}"
 
     # ################################
     # snap packages
     # ################################
 
-  - name: 'snap packages: install GUI development tools'
+  - name: 'snap packages: install'
     community.general.snap:
       state: present
       name: "{{ item }}"
-    loop: "{{ list_packages_snap_gui_development }}"
+    loop: "{{ list_packages_snap }}"
 
-  - name: 'snap packages: install vscode with --classic option'
+  - name: 'snap packages: install with --classic option'
     community.general.snap:
       state: present
       classic: true
       name: "{{ item }}"
-    loop: "{{ list_packages_snap_gui_development_classic }}"
-
-  - name: 'snap packages: install desktop tools'
-    community.general.snap:
-      state: present
-      name: "{{ item }}"
-    loop: "{{ list_packages_snap_desktop }}"
+    loop: "{{ list_packages_snap_classic_mode }}"
 
     # ################################
     # pip packages
     # ################################
 
-  - name: 'pip packages: install CLI development tools'
+  - name: 'pip packages: install'
     ansible.builtin.pip:
       state: present
       name: "{{ item }}"
-    loop: "{{ list_packages_pip_cli_development }}"
+    loop: "{{ list_packages_pip }}"
 
     # ################################
     # apt-get autoclean && apt-get autoremove && apt-get clean
