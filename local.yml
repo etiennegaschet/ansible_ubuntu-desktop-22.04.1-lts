@@ -181,7 +181,7 @@
       dest: /etc/gdm3/custom.conf
       owner: root
       group: root
-      mode: 0644
+      mode: '0644'
       backup: yes
 
   - name: 'system config: restarting gdm3 service'
@@ -199,7 +199,7 @@
       dest: "/home/{{ item }}/.bash_logout"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: 0644
+      mode: '0644'
     loop: "{{ list_users }}"
 
   - name: 'users config: copying "~/.bash_aliases"'
@@ -208,7 +208,7 @@
       dest: "/home/{{ item }}/.bash_aliases"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: 0644
+      mode: '0644'
     loop: "{{ list_users }}"
 
   - name: 'users config: copying "~/.bashrc"'
@@ -217,7 +217,7 @@
       dest: "/home/{{ item }}/.bashrc"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: 0644
+      mode: '0644'
     loop: "{{ list_users }}"
 
   - name: 'users config: copying "~/.profile"'
@@ -226,7 +226,7 @@
       dest: "/home/{{ item }}/.profile"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: 0644
+      mode: '0644'
     loop: "{{ list_users }}"
 
   - name: 'users config: creating "~/.fonts" directory'
@@ -235,7 +235,7 @@
       path: "/home/{{ item }}/.fonts"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: '0775'
+      mode: '0755'
     loop: "{{ list_users }}"
 
   - name: 'users config: unzipping "CodeNewRoman" font archive'
@@ -250,6 +250,15 @@
   - name: 'users config: updating the font cache'
     ansible.builtin.command: fc-cache -fv
 
+  - name: 'users config: creating "~/.config" directory'
+    ansible.builtin.file:
+      state: directory
+      path: "/home/{{ item }}/.config"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: '0700'
+    loop: "{{ list_users }}"
+
   - name: 'users config: copying "~/.config/monitors.xml" (setting screen resolution)'
     ansible.builtin.copy:
       # src: "files/home/user/.config/monitors.xml"
@@ -257,7 +266,7 @@
       dest: "/home/{{ item }}/.config/monitors.xml"
       owner: "{{ item }}"
       group: "{{ item }}"
-      mode: 0664
+      mode: '0644'
     loop: "{{ list_users }}"
 
 # ################################
@@ -270,7 +279,7 @@
       dest: /etc/sudoers.d/ansible-deploy
       owner: root
       group: root
-      mode: 0440
+      mode: '0640'
 
   - name: 'ansible auto-provision: adding ansible-pull cron job for user "ansible-deploy"'
     ansible.builtin.cron:
