@@ -1,59 +1,58 @@
 ---
-- hosts: localhost
+- name: 'Workstation installation: Ubuntu 22.04.1 LTS'
+  hosts: localhost
   connection: local
   become: true
-
-  # - name: Install a .deb package from the internet
-  # ansible.builtin.apt:
-  #   deb: https://example.com/python-ppq_0.1-1_all.deb
-  # https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb
 
   vars:
 
     list_system_locales:
-      - en_US
-      - en_US.UTF-8
-      - fr_FR
-      - fr_FR.UTF-8
+      - 'en_US'
+      - 'en_US.UTF-8'
+      - 'fr_FR'
+      - 'fr_FR.UTF-8'
 
     list_system_users:
-      - etienneg
+      - 'etienneg'
 
     list_packages_apt_ubuntu:
-      - ubuntu-desktop
+      - 'ubuntu-desktop'
 
     list_packages_apt_cli_development:
-      - git
-      - jq
-      - tree
-      - shellcheck
-      - libsecret-tools
-      - python3-pip
+      - 'git'
+      - 'jq'
+      - 'tree'
+      - 'shellcheck'
+      - 'libsecret-tools'
+      - 'python3-pip'
 
     list_packages_apt_gui_development:
-      - virtualbox
-      - rabbitvcs-nautilus
+      - 'virtualbox'
+      - 'rabbitvcs-nautilus'
 
     list_packages_apt_desktop:
-      - blueman
+      - 'blueman'
+
+    list_packages_apt_url:
+      - 'https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb'
 
     list_packages_snap_gui_development:
-      - notepadqq
+      - 'notepadqq'
 
     list_packages_snap_gui_development_classic:
-      - code
+      - 'code'
 
     list_packages_snap_desktop:
-      - snap-store
-      - brave
-      - teams
+      - 'snap-store'
+      - 'brave'
+      - 'teams'
 
     list_packages_pip_cli_development:
-      - powerline-shell
+      - 'powerline-shell'
 
     # file_config_user_monitor: monitors-1920x1080.xml
     # file_config_user_monitor: monitors-vagrant-1360x768.xml
-    file_config_user_monitor: "monitors-vagrant-1280x960.xml"
+    file_config_user_monitor: 'monitors-vagrant-1280x960.xml'
 
   tasks:
 
@@ -122,6 +121,13 @@
       force_apt_get: yes
       name: "{{ item }}"
     loop: "{{ list_packages_apt_desktop }}"
+
+  - name: 'apt packages: install via URL'
+    ansible.builtin.apt:
+      state: present
+      force_apt_get: yes
+      deb: "{{ item }}"
+    loop: "{{ package_apt_url_docker_desktop }}"
 
     # ################################
     # snap packages
@@ -321,9 +327,9 @@
     # system reboot
     # ################################
 
-  - name: 'system reboot'
-    ansible.builtin.reboot:
-      reboot_timeout: 600
+  # - name: 'system reboot'
+  #   ansible.builtin.reboot:
+  #     reboot_timeout: 600
 
     # ################################
     # handlers
