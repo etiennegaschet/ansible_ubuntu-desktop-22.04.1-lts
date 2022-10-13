@@ -127,7 +127,7 @@
       state: present
       force_apt_get: yes
       deb: "{{ item }}"
-    loop: "{{ package_apt_url_docker_desktop }}"
+    loop: "{{ list_packages_apt_url }}"
 
     # ################################
     # snap packages
