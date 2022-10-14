@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
      vb.customize ['modifyvm', :id, '--accelerate3d', 'on']
      vb.customize ['modifyvm', :id, '--graphicscontroller', 'vboxsvga']
      vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']
-     vb.customize ['modifyvm', :id, '--vram', '1024']
+     vb.customize ['modifyvm', :id, '--vram', '256']
   end
 
   config.vm.provision "shell", inline: $script
