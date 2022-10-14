@@ -27,7 +27,11 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
      vb.memory = "4096"
      vb.cpus = 4
-     vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
+     vb.customize ['modifyvm', :id, '--accelerate2dvideo', 'on']
+     vb.customize ['modifyvm', :id, '--accelerate3d', 'on']
+     vb.customize ['modifyvm', :id, '--graphicscontroller', 'vboxsvga']
+     vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']
+     vb.customize ['modifyvm', :id, '--vram', '1024']
   end
 
   config.vm.provision "shell", inline: $script
