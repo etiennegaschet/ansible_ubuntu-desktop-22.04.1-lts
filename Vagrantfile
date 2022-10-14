@@ -7,8 +7,6 @@ echo Installing Desktop
 
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get update
-
 apt-get install -y software-properties-common
 apt-get install -y ansible
 

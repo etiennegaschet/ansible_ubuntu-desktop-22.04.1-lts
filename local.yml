@@ -15,14 +15,6 @@
     list_system_users:
       - 'etienneg'
 
-    list_packages_apt_keys:
-      # adds docker GPG apt key:
-      - 'https://download.docker.com/linux/ubuntu/gpg'
-
-    list_packages_apt_repositories:
-      # adds docker repository:
-      - 'deb https://download.docker.com/linux/ubuntu jammy stable'
-
     list_packages_apt:
       # installs a desktop environment:
       - 'ubuntu-desktop'
@@ -38,20 +30,6 @@
       - 'rabbitvcs-nautilus'
       # installs desktop tools:
       - 'blueman'
-      # installs docker-ce and docker-desktop dependencies:
-      - 'aptitude'
-      - 'apt-transport-https'
-      - 'ca-certificates'
-      - 'curl'
-      - 'software-properties-common'
-      - 'python3-pip'
-      - 'virtualenv'
-      - 'python3-setuptools'
-      # installs docker-ce
-      - 'docker-ce'
-
-    list_packages_apt_via_url:
-      - 'https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb'
 
     list_packages_snap:
       # installs GUI development tools:
@@ -68,6 +46,48 @@
     list_packages_pip:
       # installs CLI development tools:
       - 'powerline-shell'
+
+    docker_install:
+      apt_remove:
+        - 'docker'
+        - 'docker-engine'
+        - 'docker.io'
+        - 'containerd'
+        - 'runc'
+      apt_dependencies:
+        - 'apt-transport-https'
+        - 'ca-certificates'
+        - 'curl'
+        - 'software-properties-common'
+        - 'python3-pip'
+        - 'virtualenv'
+        - 'gnupg'
+        - 'lsb-release'
+        - 'python3-setuptools'
+        - 'xz-utils'
+      file_remove_gpg_keys:
+        - '/usr/share/keyrings/docker-archive-keyring.gpg'
+        - '/usr/share/keyrings/docker-archive-keyring.gpg_armored'
+      download_gpg_key:
+        url: 'https://download.docker.com/linux/ubuntu/gpg'
+        dest: '/usr/share/keyrings/docker-archive-keyring.gpg_armored'
+        checksum: 'sha256:1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570'
+      dearmor_gpg_key:
+        shell:  'gpg --dearmor < /usr/share/keyrings/docker-archive-keyring.gpg_armored > /usr/share/keyrings/docker-archive-keyring.gpg'
+        created_file: '/usr/share/keyrings/docker-archive-keyring.gpg'
+      apt_repository:
+        repo: "deb [arch={{ architecture_map[ansible_architecture] }} signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        architecture_map:
+          'x86_64': 'amd64'
+          'aarch64': 'arm64'
+          'aarch': 'arm64'
+          'armhf': 'armhf'
+          'armv7l': 'armhf'
+      apt_docker_engine:
+        - 'docker-ce'
+        - 'docker-ce-cli'
+        - 'containerd.io'
+      apt_deb_url_docker_desktop: 'https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb'
 
     # file_config_user_monitor: 'monitors.xml.laptop-1920x1080'
     # file_config_user_monitor: 'monitors.xml.vagrant-1360x768'
@@ -109,33 +129,13 @@
     # apt packages
     # ################################
 
-  - name: 'add GPG apt keys'
-    apt_key:
-      state: present
-      url: "{{ item }}"
-    loop: "{{ list_packages_apt_keys }}"
-
-  - name: 'apt packages: add repositories'
-    apt_repository:
-      state: present
-      repo: "{{ item }}"
-    loop: "{{ list_packages_apt_repositories }}"
-
   - name: 'apt packages: install via repo'
     ansible.builtin.apt:
-      state: present
+      state: latest
       force_apt_get: yes
       update_cache: yes
       name: "{{ item }}"
-    loop: "{{ list_packages_apt }}"
-
-  - name: 'apt packages: install via .deb file URL'
-    ansible.builtin.apt:
-      state: present
-      force_apt_get: yes
-      update_cache: yes
-      deb: "{{ item }}"
-    loop: "{{ list_packages_apt_via_url }}"
+    loop: "{{ list_packages_apt_install }}"
 
     # ################################
     # snap packages
@@ -165,6 +165,88 @@
     loop: "{{ list_packages_pip }}"
 
     # ################################
+    # docker / docker-desktop install
+    # ################################
+
+  - name: 'docker: remove old docker versions'
+    ansible.builtin.apt:
+      state: absent
+      purge: true
+      name: "{{ item }}"
+    loop: "{{ docker_install.apt_remove }}"
+
+  # - name: Install aptitude
+  #   ansible.builtin.apt:
+  #     name: aptitude
+  #     state: latest
+  #     update_cache: true
+
+  - name: 'docker: install required system packages'
+    ansible.builtin.apt:
+      state: latest
+      update_cache: true
+      name: "{{ item }}"
+    loop: "{{ docker_install.apt_dependencies }}"
+
+  - name: 'docker: remove GPG apt keys for docker'
+    ansible.builtin.file:
+      state: absent
+      path: "{{ item }}"
+    loop: "{{ docker_install.file_remove_gpg_keys }}"
+
+  - name: 'docker: download gpg key'
+    ansible.builtin.get_url:
+      url: "{{ docker_install.download_gpg_key.url }}"
+      dest: "{{ docker_install.download_gpg_key.dest }}"
+      checksum: "{{ docker_install.download_gpg_key.checksum }}"
+
+  - name: 'docker: dearmor gpg key'
+    ansible.builtin.shell:  "{{ docker_install.dearmor_gpg_key.shell }}"
+    args:
+      creates: "{{ docker_install.dearmor_gpg_key.created_file }}"
+
+  - name: 'docker: add repository to apt sources list'
+    ansible.builtin.apt_repository:
+      state: present
+      repo: "{{ docker_install.apt_repository.repo }}"
+    vars:
+      architecture_map: "{{ docker_install.apt_repository.architecture_map }}"
+
+  - name: 'docker: install docker engine'
+    ansible.builtin.apt:
+      state: present
+      force_apt_get: yes
+      update_cache: true
+      path: "{{ item }}"
+    loop: "{{ docker_install.apt_docker_engine }}"
+
+  - name: 'docker: install docker-desktop via .deb file URL'
+    ansible.builtin.apt:
+      state: present
+      force_apt_get: yes
+      update_cache: yes
+      deb: "{{ docker_install.apt_deb_url_docker_desktop }}"
+
+  # - name: Remove old docker compose
+  #   file:
+  #     path: /usr/local/bin/docker-compose
+  #     state: absent
+
+  # # $ sudo curl -L "https://github.com/docker/compose/releases/download/1.28.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  # - name: "Install Docker Compose"
+  #   ansible.builtin.get_url:
+  #     url: "https://github.com/docker/compose/releases/download/{{ compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+  #     dest: /usr/local/bin/docker-compose
+  #     mode: "0755"
+  #     checksum: sha256:https://github.com/docker/compose/releases/download/{{ compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}.sha256 # curl -sL https://download.docker.com/linux/ubuntu/gpg|sha256sum
+  #   vars:
+  #     compose_version: 1.29.2
+
+  # - name: Install Docker Module for Python
+  #   pip:
+  #     name: docker
+
+    # ################################
     # apt-get update && apt-get upgrade
     # ################################
 
@@ -179,7 +261,7 @@
       upgrade: yes
 
     # ################################
-    # apt-get autoclean && apt-get autoremove && apt-get clean
+    # apt-get autoclean && apt-get autoremove
     # ################################
 
   - name: 'apt-get autoclean: remove useless packages from the cache'
