@@ -135,7 +135,7 @@
       force_apt_get: yes
       update_cache: yes
       name: "{{ item }}"
-    loop: "{{ list_packages_apt_install }}"
+    loop: "{{ list_packages_apt }}"
 
     # ################################
     # snap packages
