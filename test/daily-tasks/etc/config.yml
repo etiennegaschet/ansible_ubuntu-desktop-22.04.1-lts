@@ -1,0 +1,7 @@
+files:
+  tasks:
+    path: 'etc/tasks.yml'
+    encrypted: false
+  credentials:
+    path: 'etc/credentials.yml'
+    encrypted: true
