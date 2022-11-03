@@ -1,6 +1,6 @@
-/Include/*
 # ignore python venv files and folders:
 /Include/*
 /Lib/*
 /Scripts/*
 /pyvenv.cfg
+/app/lib/__pycache__/*

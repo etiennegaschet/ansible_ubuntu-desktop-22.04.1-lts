@@ -3,7 +3,7 @@ user@host ~/src $ cd daily-tasks
 user@host ~/src/daily-tasks $ python -m venv . && source ./Scripts/activate && python -m pip install -r requirements.txt
 
 # executing tasks:
-user@host ~/src/daily-tasks $ ./tasks.py
+user@host ~/src/daily-tasks $ python app/index.py
 
 # activating environment:
 user@host ~/src/daily-tasks $ source ./Scripts/activate
